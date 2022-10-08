@@ -9,6 +9,7 @@ from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
+from erpnext.controllers.queries import customer_query
 
 
 def search_by_term(search_term, warehouse, price_list):
@@ -266,20 +267,43 @@ def create_opening_voucher(pos_profile, company, balance_details):
 def get_past_order_list(search_term, status, limit=20):
 	fields = ["name", "grand_total", "currency", "customer", "posting_time", "posting_date"]
 	invoice_list = []
+	invoice_list_stg = []
+	customer_name = ''
+
+
+	# changes made by Farhan
+	# increase input time and change logic to multiple customers
+	if search_term.isnumeric():
+		customer_name = frappe.db.sql(
+				"""
+				SELECT name FROM `tabCustomer`
+				WHERE
+					mobile_no like %s
+				""",
+				("%{}%".format(search_term)),
+				as_dict=1,
+			)
+		# search_term = customer_name[0]['name']
+	# contact = frappe.get_cached_value("Customer", customer, "customer_primary_contact")
 
 	if search_term and status:
-		invoices_by_customer = frappe.db.get_all(
-			"POS Invoice",
-			filters={"customer": ["like", "%{}%".format(search_term)], "status": status},
-			fields=fields,
-		)
+		if customer_name:
+			for st in customer_name:
+				invoices_by_customer = frappe.db.get_all(
+					"POS Invoice",
+					filters={"customer": ["=", st['name']], "status": status},
+					fields=fields,
+				)
+				for d in invoices_by_customer:
+					invoice_list_stg.append(d)
+
 		invoices_by_name = frappe.db.get_all(
 			"POS Invoice",
 			filters={"name": ["like", "%{}%".format(search_term)], "status": status},
 			fields=fields,
 		)
 
-		invoice_list = invoices_by_customer + invoices_by_name
+		invoice_list = invoice_list_stg + invoices_by_name
 	elif status:
 		invoice_list = frappe.db.get_all("POS Invoice", filters={"status": status}, fields=fields)
 

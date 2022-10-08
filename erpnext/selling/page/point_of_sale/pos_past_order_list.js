@@ -32,6 +32,7 @@ erpnext.PointOfSale.PastOrderList = class {
 		this.search_field.$input.on('input', (e) => {
 			clearTimeout(this.last_search);
 			this.last_search = setTimeout(() => {
+				debugger;
 				const search_term = e.target.value;
 				this.refresh_list(search_term, this.status_field.get_value());
 			}, 300);
@@ -50,7 +51,7 @@ erpnext.PointOfSale.PastOrderList = class {
 			df: {
 				label: __('Search'),
 				fieldtype: 'Data',
-				placeholder: __('Search by invoice id or customer name')
+				placeholder: __('Search by invoice id or customer mobile no')
 			},
 			parent: this.$component.find('.search-field'),
 			render_input: true,

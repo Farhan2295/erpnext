@@ -1,5 +1,6 @@
 erpnext.PointOfSale.ItemCart = class {
 	constructor({ wrapper, events, settings }) {
+		debugger;
 		this.wrapper = wrapper;
 		this.events = events;
 		this.customer_info = undefined;
@@ -192,6 +193,7 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$component.on('click', '.checkout-btn', async function() {
+			debugger;
 			if ($(this).attr('style').indexOf('--blue-500') == -1) return;
 
 			await me.events.checkout();
@@ -313,6 +315,7 @@ erpnext.PointOfSale.ItemCart = class {
 				get_query: () => query,
 				onchange: function() {
 					if (this.value) {
+						debugger;
 						const frm = me.events.get_frm();
 						frappe.dom.freeze();
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
